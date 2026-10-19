@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>老周家斗地主</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='5' fill='%231c5e36'/%3E%3Ctext x='16' y='23' font-size='18' text-anchor='middle' fill='%23f0c83c' font-family='sans-serif'%3E♠%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="game-wrap">
+    <canvas id="game-canvas" width="1000" height="700"></canvas>
+  </div>
+  <noscript>需要启用 JavaScript 才能运行游戏。</noscript>
+  <!-- 加载顺序与 Python 模块依赖一致：随机数 -> 牌 -> 牌堆 -> 规则 -> 状态机 -> AI -> 界面 -> 入口 -->
+  <script src="js/pyrandom.js"></script>
+  <script src="js/card.js"></script>
+  <script src="js/deck.js"></script>
+  <script src="js/rule_engine.js"></script>
+  <script src="js/game_state.js"></script>
+  <script src="js/ai_player.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

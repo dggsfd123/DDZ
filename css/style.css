@@ -1,0 +1,32 @@
+/* 老周家斗地主 - 页面样式（Canvas 自适应缩放，保持 1000x700 逻辑分辨率） */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0b0f0c;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "LXGW WenKai", "Microsoft YaHei", "PingFang SC", "Noto Sans SC", "SimHei", sans-serif;
+}
+
+#game-wrap {
+  line-height: 0;
+}
+
+#game-canvas {
+  display: block;
+  background: #000;
+  box-shadow: 0 0 48px rgba(0, 0, 0, 0.65);
+  cursor: pointer;
+  touch-action: none;
+}
