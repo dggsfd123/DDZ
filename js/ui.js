@@ -8,7 +8,10 @@
  * - 分数显示、胜负结算弹窗
  * - 开始界面（标题 + 难度选择 + 头像）、发牌动画、炸弹特效、久坐提醒
  *
- * 逻辑分辨率固定 1000x700，与 pygame 窗口一致；CSS 自适应缩放。
+ * 逻辑分辨率固定 1200x540（20:9 宽屏，适配手机横屏），CSS 自适应缩放。
+ * 相对 1000x700 的 pygame 版：横向更宽、纵向更紧凑，个别硬编码坐标
+ * （顶部面板、出牌区、开始界面卡片、手牌基線）按新比例重新分配；
+ * 字体整体放大一档。游戏逻辑、AI、计分与 pygame 版完全一致。
  */
 (function (global) {
   "use strict";
@@ -187,7 +190,7 @@
 
     if (card.suit === Suit.JOKER) {
       // 王：显示文字
-      drawText(ctx, RANK_DISPLAY[card.rank], x + 8, oy + 14, 22, color);
+      drawText(ctx, RANK_DISPLAY[card.rank], x + 8, oy + 13, 24, color);
       // 王简笔画皇冠标识
       const cx = x + CARD_W / 2;
       ctx.fillStyle = rgb(GOLD);
@@ -205,14 +208,14 @@
     }
 
     // 左上角点数
-    drawText(ctx, RANK_DISPLAY[card.rank], x + 7, oy + 7, 24, color);
+    drawText(ctx, RANK_DISPLAY[card.rank], x + 7, oy + 6, 26, color);
     // 左上角小花色
-    drawSuit(ctx, card.suit, x + 16, oy + 44, 9, color);
+    drawSuit(ctx, card.suit, x + 17, oy + 46, 9, color);
     // 中央大花色
-    drawSuit(ctx, card.suit, x + CARD_W / 2, oy + 60, 18, color);
+    drawSuit(ctx, card.suit, x + CARD_W / 2, oy + 62, 18, color);
     // 右下角点数（便于远距离识别）
-    const r2w = textWidth(ctx, RANK_DISPLAY[card.rank], 18);
-    drawText(ctx, RANK_DISPLAY[card.rank], x + CARD_W - 7 - r2w, oy + CARD_H - 7 - 18, 18, color);
+    const r2w = textWidth(ctx, RANK_DISPLAY[card.rank], 20);
+    drawText(ctx, RANK_DISPLAY[card.rank], x + CARD_W - 7 - r2w, oy + CARD_H - 7 - 20, 20, color);
   }
 
   /* 简单矩形按钮，支持点击命中检测 */
@@ -231,7 +234,7 @@
       fillRoundRect(ctx, this.x, this.y, this.w, this.h, 8, color);
       strokeRoundRect(ctx, this.x, this.y, this.w, this.h, 8, WHITE, 2);
       // 文字居中（textBaseline=top，手动上移约半个字高）
-      drawText(ctx, this.text, this.x + this.w / 2, this.y + this.h / 2 - 11, 22, WHITE, "center");
+      drawText(ctx, this.text, this.x + this.w / 2, this.y + this.h / 2 - 12, 24, WHITE, "center");
     }
 
     hit(px, py) {
@@ -241,8 +244,8 @@
 
   class GameUI {
     constructor(seed = null, start_scene = false) {
-      this.W = 1000;
-      this.H = 700;
+      this.W = 1200;
+      this.H = 540;
       this.canvas = document.getElementById("game-canvas");
       this.ctx = this.canvas.getContext("2d");
       this.seed = seed;
@@ -389,13 +392,14 @@
 
     /* ---------- 场景切换 ---------- */
     _build_start_panels() {
-      /* 开始界面三个难度选择卡片（矩形 + 对应难度），整体控制在窗口高度内。 */
+      /* 开始界面三个难度选择卡片（矩形 + 对应难度），整体控制在窗口高度内。
+       * 20:9（1200x540）下重新分配：卡片更高更扁、间距收紧。 */
       const panels = [];
       const card_w = 460;
-      const card_h = 118;
+      const card_h = 90;
       const x = this.W / 2 - card_w / 2;
-      const y0 = 212;
-      const gap = 18;
+      const y0 = 194;
+      const gap = 12;
       const diffs = ["easy", "normal", "hard"];
       for (let i = 0; i < diffs.length; i++) {
         panels.push({
@@ -907,7 +911,7 @@
           this.ctx.translate(this.W / 2, this.H / 2 - 40);
           this.ctx.scale(scale, scale);
           // 描边
-          this.ctx.font = fontStr(72);
+          this.ctx.font = fontStr(84);
           this.ctx.lineWidth = 6;
           this.ctx.strokeStyle = rgb([0, 0, 0]);
           this.ctx.strokeText(e.text, 0, 0);
@@ -1048,9 +1052,9 @@
       strokeRoundRect(ctx, deck_x, deck_y, 40, 56, 4, [60, 60, 60], 2);
       // 三家手牌目标位置
       const targets = {
-        0: [this.W / 2 - 200, this.H - CARD_H - 95],
-        1: [60, 220],
-        2: [this.W - 60 - 26, 220],
+        0: [this.W / 2 - 200, this.H - CARD_H - 68],
+        1: [60, 202],
+        2: [this.W - 60 - 26, 202],
       };
       // 每张牌按顺序飞出，最后 3 张为底牌（底牌展示已取消，发牌时留在牌堆中央）
       const total = 54;
@@ -1074,7 +1078,7 @@
         fillRoundRect(ctx, cx + 4, cy + 4, 32, 48, 3, [120, 170, 230]);
       }
       // 提示
-      drawText(ctx, "发牌中…", this.W / 2, 250, 24, GOLD, "center");
+      drawText(ctx, "发牌中…", this.W / 2, 250, 28, GOLD, "center");
     }
 
     _draw_avatar(cx, cy, radius, key) {
@@ -1100,8 +1104,8 @@
       const ctx = this.ctx;
       // 玩家1（左上）、玩家2（右上）：面板 + 密集手牌（牌背）展示数量
       const layout = [
-        [1, 20, 150],                 // 左上，面板左对齐留边距
-        [2, this.W - 20 - 172, 150],  // 右上，面板右对齐留边距（172=面板宽）
+        [1, 20, 136],                 // 左上，面板左对齐留边距
+        [2, this.W - 20 - 172, 136],  // 右上，面板右对齐留边距（172=面板宽）
       ];
       for (const [pid, px, py] of layout) {
         const p = this.gs.players[pid];
@@ -1110,22 +1114,22 @@
           : (this.gs.landlord_id !== null ? "农民" : "");
         const is_turn = this.gs.phase === GamePhase.PLAY && this.gs.current_turn === pid;
         const panel_w = 172;
-        const panel_h = 64;
+        const panel_h = 60;
         fillRoundRect(ctx, px, py, panel_w, panel_h, 10, "rgba(0,0,0,0.588)"); // (0,0,0,150)
         if (is_turn) {
           strokeRoundRect(ctx, px, py, panel_w, panel_h, 10, GOLD, 3);
         }
         // 头像圆
-        this._draw_avatar(px + 24, py + 32, 18, this.player_avatars[pid] || "p01");
+        this._draw_avatar(px + 24, py + 30, 18, this.player_avatars[pid] || "p01");
         // 名字 / 角色 / 剩余
-        drawText(ctx, p.name, px + 50, py + 8, 18, WHITE);
-        drawText(ctx, role, px + 50, py + 34, 18,
+        drawText(ctx, p.name, px + 50, py + 6, 20, WHITE);
+        drawText(ctx, role, px + 50, py + 32, 20,
           role === "地主" ? GOLD : [180, 220, 180]);
-        drawText(ctx, `剩 ${p.hand.length}`, px + 110, py + 34, 18, WHITE);
+        drawText(ctx, `剩 ${p.hand.length}`, px + 110, py + 32, 20, WHITE);
         // 密集手牌（牌背小卡），展示数量
         this._draw_opponent_hand(p, px, py + panel_h + 6, panel_w);
         if (is_turn) {
-          drawText(ctx, "▶ 出牌中", px, py - 26, 18, GOLD);
+          drawText(ctx, "▶ 出牌中", px, py - 24, 20, GOLD);
         }
       }
     }
@@ -1159,9 +1163,9 @@
       this._draw_avatar(34, this.H - CARD_H - 100, 18, this.player_avatars[0] || "p01");
       drawText(ctx,
         `${p.name} ${role} 剩余 ${p.hand.length} 张   累计得分 ${this.total_scores[0]}`,
-        60, this.H - CARD_H - 122, 18, WHITE);
+        60, this.H - CARD_H - 122, 20, WHITE);
       if (this.gs.phase === GamePhase.PLAY && this.gs.current_turn === 0) {
-        drawText(ctx, "▶ 轮到你", 360, this.H - CARD_H - 122, 18, GOLD);
+        drawText(ctx, "▶ 轮到你", 450, this.H - CARD_H - 122, 20, GOLD);
       }
     }
 
@@ -1174,7 +1178,7 @@
       const order = this._display_order(); // 权重从大到小
       this.hand_rects = [];                // 记录每张牌的绘制矩形，供点击命中
       const start_x = this._hand_start_x(n);
-      const y = this.H - CARD_H - 95;
+      const y = this.H - CARD_H - 68;
       for (let disp_idx = 0; disp_idx < order.length; disp_idx++) {
         const hand_idx = order[disp_idx];
         const x = start_x + disp_idx * CARD_GAP;
@@ -1194,8 +1198,8 @@
       // 三家相对位置：0 下（上移到手牌上方，避免遮挡自己的手牌），1 左，2 右
       const slots = {
         0: [this.W / 2 - 100, this.H - CARD_H - 240],
-        1: [120, 300],
-        2: [this.W - 120 - 5 * (CARD_W / 2), 300],
+        1: [120, 266],
+        2: [this.W - 120 - 5 * (CARD_W / 2), 266],
       };
       for (const [pidStr, cards] of Object.entries(this.last_play_area)) {
         const pid = Number(pidStr);
@@ -1204,7 +1208,7 @@
         const y = slots[pid][1];
         // 出牌者姓名标签，避免看不清是谁出的
         const name = pid < this.gs.players.length ? this.gs.players[pid].name : "";
-        drawText(ctx, name, x, y - 22, 18, WHITE);
+        drawText(ctx, name, x, y - 22, 20, WHITE);
         for (let j = 0; j < cards.length; j++) {
           drawCardFace(ctx, x + j * (CARD_W / 2 + 4), y, cards[j], false, false);
         }
@@ -1217,7 +1221,7 @@
       // 底牌：仅在叫地主阶段（地主未定，landlord_id 为 None）显示，供玩家判断是否叫地主；
       // 地主确定后立即隐藏，避免与顶部文字互相遮挡。
       if (this.gs.landlord_id === null && this.gs.bottom.length > 0) {
-        drawText(ctx, "底牌", this.W / 2, 120, 18, GOLD, "center");
+        drawText(ctx, "底牌", this.W / 2, 120, 20, GOLD, "center");
         for (let j = 0; j < this.gs.bottom.length; j++) {
           drawCardFace(ctx, this.W / 2 - 100 + j * (CARD_W + 6), 140, this.gs.bottom[j], false, false);
         }
@@ -1228,8 +1232,8 @@
         const info =
           `第${this.round_no}局  叫分 ${base}  炸弹 ${this.gs.bomb_count}  ` +
           `预计得分 ${base * Math.pow(2, this.gs.bomb_count)}`;
-        const w = textWidth(ctx, info, 18);
-        drawText(ctx, info, Math.max(10, this.W - w - 20), 16, 18, GOLD);
+        const w = textWidth(ctx, info, 20);
+        drawText(ctx, info, Math.max(10, this.W - w - 20), 14, 20, GOLD);
       }
     }
 
@@ -1237,11 +1241,11 @@
       const ctx = this.ctx;
       // 顶部中央：回合提示（当前轮到谁，表明叫地主/出牌是轮流进行）
       if (this.msg_turn) {
-        drawText(ctx, this.msg_turn, this.W / 2, 54, 18, GOLD, "center");
+        drawText(ctx, this.msg_turn, this.W / 2, 44, 20, GOLD, "center");
       }
       // 事件提示（最近一次叫分/出牌结果）
       if (this.msg) {
-        drawText(ctx, this.msg, this.W / 2, 84, 24, WHITE, "center");
+        drawText(ctx, this.msg, this.W / 2, 74, 28, WHITE, "center");
       }
     }
 
@@ -1272,7 +1276,7 @@
       const mm = Math.trunc(sec / 60);
       const ss = sec % 60;
       const text = `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
-      drawText(this.ctx, text, 12, this.H - 26, 18, [180, 180, 180]); // 浅灰小字
+      drawText(this.ctx, text, 12, this.H - 26, 20, [180, 180, 180]); // 浅灰小字
     }
 
     _draw_break_screen() {
@@ -1280,12 +1284,12 @@
       const ctx = this.ctx;
       ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, this.W, this.H);
-      drawText(ctx, "起来活动一下吧！", this.W / 2, this.H / 2 - 40, 34, WHITE, "center");
+      drawText(ctx, "起来活动一下吧！", this.W / 2, this.H / 2 - 40, 40, WHITE, "center");
       const sec = Math.max(0, Math.trunc(this.reminder_remaining));
       const mm = Math.trunc(sec / 60);
       const ss = sec % 60;
       const sub = `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
-      drawText(ctx, sub, this.W / 2, this.H / 2 + 20, 24, GOLD, "center");
+      drawText(ctx, sub, this.W / 2, this.H / 2 + 20, 28, GOLD, "center");
     }
 
     _draw_buttons() {
@@ -1332,7 +1336,7 @@
           color = [170, 220, 255];
         }
         if (hint) {
-          drawText(ctx, hint, this.W / 2 - 220 + 470, this.H - 44, 18, color);
+          drawText(ctx, hint, this.W / 2 - 220 + 470, this.H - 44, 20, color);
         }
       }
     }
@@ -1367,16 +1371,16 @@
       fillRoundRect(ctx, px, py, pw, ph, 16, WHITE);
       strokeRoundRect(ctx, px, py, pw, ph, 16, bar_color, 4);
       // 顶部彩条 + 标题
-      fillRoundRect(ctx, px, py, pw, 52, 16, bar_color, [true, true, false, false]);
-      const t1w = textWidth(ctx, title, 34);
-      drawText(ctx, title, px + (pw - t1w) / 2, py + 10, 34, BLACK);
+      fillRoundRect(ctx, px, py, pw, 56, 16, bar_color, [true, true, false, false]);
+      const t1w = textWidth(ctx, title, 40);
+      drawText(ctx, title, px + (pw - t1w) / 2, py + 10, 40, BLACK);
       // 多行详情
       const lines = detail.split("\n");
-      let ly = py + 80;
+      let ly = py + 84;
       for (const line of lines) {
-        const t2w = textWidth(ctx, line, 18);
-        drawText(ctx, line, px + (pw - t2w) / 2, ly, 18, [40, 40, 40]);
-        ly += 32;
+        const t2w = textWidth(ctx, line, 20);
+        drawText(ctx, line, px + (pw - t2w) / 2, ly, 20, [40, 40, 40]);
+        ly += 34;
       }
       // 提示 / 倒计时
       let hint;
@@ -1389,8 +1393,8 @@
         hint = `${remain.toFixed(0)} 秒后自动开始下一局（或点击按钮）`;
         this.buttons.again.text = "再来一局";
       }
-      const hw = textWidth(ctx, hint, 18);
-      drawText(ctx, hint, px + (pw - hw) / 2, py + ph - 60, 18, [120, 120, 120]);
+      const hw = textWidth(ctx, hint, 20);
+      drawText(ctx, hint, px + (pw - hw) / 2, py + ph - 60, 20, [120, 120, 120]);
       this.buttons.again.draw(ctx);
     }
 
@@ -1410,26 +1414,26 @@
 
       // 标题（金色，居中，带阴影描边）
       const title = "老周家斗地主";
-      const tw = textWidth(ctx, title, 34);
-      drawText(ctx, title, this.W / 2 - tw / 2 + 2, 88, 34, [40, 28, 0]);
-      drawText(ctx, title, this.W / 2 - tw / 2, 86, 34, GOLD);
+      const tw = textWidth(ctx, title, 40);
+      drawText(ctx, title, this.W / 2 - tw / 2 + 2, 78, 40, [40, 28, 0]);
+      drawText(ctx, title, this.W / 2 - tw / 2, 76, 40, GOLD);
       // 标题装饰双线
       const lw = 220;
       ctx.strokeStyle = rgb(GOLD);
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(this.W / 2 - lw, 132);
-      ctx.lineTo(this.W / 2 - 40, 132);
-      ctx.moveTo(this.W / 2 + 40, 132);
-      ctx.lineTo(this.W / 2 + lw, 132);
+      ctx.moveTo(this.W / 2 - lw, 124);
+      ctx.lineTo(this.W / 2 - 40, 124);
+      ctx.moveTo(this.W / 2 + 40, 124);
+      ctx.lineTo(this.W / 2 + lw, 124);
       ctx.stroke();
       ctx.fillStyle = rgb(GOLD);
       ctx.beginPath();
-      ctx.arc(this.W / 2, 132, 5, 0, Math.PI * 2);
+      ctx.arc(this.W / 2, 124, 5, 0, Math.PI * 2);
       ctx.fill();
 
       // 副标题
-      drawText(ctx, "选择难度开始游戏", this.W / 2, 158, 24, [235, 230, 215], "center");
+      drawText(ctx, "选择难度开始游戏", this.W / 2, 148, 28, [235, 230, 215], "center");
 
       // 三个难度卡片：仅展示难度名称 + 三个头像（无姓名、无说明）
       const accent = {
@@ -1447,28 +1451,28 @@
         fillRoundRect(ctx, panel.x, panel.y, 8, panel.h, 16, col, [true, false, false, true]);
 
         // 难度名称（居中）
-        drawText(ctx, DIFF_LABEL[panel.diff], panel.x + panel.w / 2, panel.y + 22, 24, col, "center");
+        drawText(ctx, DIFF_LABEL[panel.diff], panel.x + panel.w / 2, panel.y + 10, 28, col, "center");
 
         // 三个头像（你 + 两个 AI），横向居中排列，无文字
         const players = [HUMAN_PLAYER[1]].concat(DIFF_AI_PLAYERS[panel.diff].map((ai) => ai[1]));
         const total = players.length;
-        const gap = 92;
+        const gap = 80;
         const start_x = panel.x + panel.w / 2 - ((total - 1) * gap) / 2;
-        const cy = panel.y + 78;
+        const cy = panel.y + 64;
         for (let j = 0; j < total; j++) {
           const cx = start_x + j * gap;
-          this._draw_avatar(cx, cy, 28, players[j]);
+          this._draw_avatar(cx, cy, 23, players[j]);
           // 头像外圈描边
           ctx.strokeStyle = "rgba(255,255,255,0.235)"; // (255,255,255,60)
           ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.arc(cx, cy, 29, 0, Math.PI * 2);
+          ctx.arc(cx, cy, 24, 0, Math.PI * 2);
           ctx.stroke();
         }
       }
 
       // 底部提示
-      drawText(ctx, "点击卡片选择难度", this.W / 2, this.H - 36, 18, [200, 210, 200], "center");
+      drawText(ctx, "点击卡片选择难度", this.W / 2, this.H - 28, 20, [200, 210, 200], "center");
     }
   }
 
